@@ -5,6 +5,7 @@
 #include <vector>
 #include <windows.h>
 using namespace std;
+string name1,name2;
 vector<int> chessCordsTOarrayCords(string position);
 class Piece{
     protected:
@@ -23,18 +24,22 @@ class Piece{
         void translateMoveTOCords();
         virtual bool validateMotion(Piece *board[8][8],int i_c = 0,int j_c = 0,int i_m = 0,int j_m = 0){
             char type1 = this->playerType;
+            int rowStep = (i_c==i_m)? 0:(i_c<i_m)? 1:-1;
+            int colStep = (j_c==j_m)? 0:(j_c<j_m)? 1:-1;
             if(board[i_m][j_m]!=nullptr){
                 char type2 = board[i_m][j_m]->retPlayerType();
-                if(type1==type2) return false;
-            }
-            int rowStep = (i_c<i_m)? 1:-1;
-            int colStep = (j_c<j_m)? 1:-1;
-            while((i_c != i_m) || (j_c != j_m)){
-                if(board[i_c][j_c] != nullptr && (i_c!=i_m && j_c !=j_m)){
+                if(type1==type2){
+                    name1 = "yaha1";
                     return false;
                 }
+            }
+            while((i_c != i_m) || (j_c != j_m)){
                 i_c+=rowStep;
                 j_c+=colStep;
+                if(board[i_c][j_c] != nullptr){
+                    name2 = "yaha2";
+                    return false;
+                }
             }
             return true;
         };
@@ -268,8 +273,8 @@ void ChessBoard :: setPieces(){
 }
 void ChessBoard ::game(){
     int choice;
-    cout<<endl<<endl<<endl
-        <<"|--- Welcome to the CONSOLE CHESS ---|\n\t"<<"1. Enter (1) to Play Chess.\n\t2. Enter (2) to Fetch Past games. \n\t3. Enter (3) to Quit\n\nChoice-->";
+    cout<<endl<<endl
+        <<"--- Welcome to the CONSOLE CHESS ---\n\t"<<"1. Enter (1) to Play Chess.\n\t2. Enter (2) to Fetch Past games. \n\t3. Enter (3) to Quit\n\nChoice-->";
     cin>>choice;
     switch(choice){
         case 1:
@@ -324,7 +329,6 @@ int ChessBoard :: gameLoop(){
     }
     if(exitCode == 1){
         string pieece = board[cPlace[0]][cPlace[1]]->retName() + '[' + chance.at(0) + ']';
-        cout<<endl;
         cout<<"Enter you move for "<<pieece<<" --> ";
         cin>>position_move;
         if(position_current==position_move){
@@ -347,12 +351,14 @@ int ChessBoard :: gameLoop(){
             bool moveVerified = board[cPlace[0]][cPlace[1]]->validateMove(board,cPlace[0],cPlace[1],position_move);
             if(moveVerified){
                 kill_MovePiece(cPlace[0],cPlace[1],mPlace);
+                cPlace.clear();
+                chance_count++;
+                return 1;
             }
+            return moveVerified;
         }
     }
-    cPlace.clear();
-    chance_count++;
-    return 1;
+    return -2;
 }
 void ChessBoard :: runGame(){
     int repeat;
@@ -367,6 +373,9 @@ void ChessBoard :: runGame(){
         repeat = gameLoop();
         system("cls");
     }while(repeat == 1 && repeat !=-2 || repeat==-1);
+    cout<<repeat;
+    cout<<name1<<endl;
+    cout<<name2;
 }
 vector<int> chessCordsTOarrayCords(string position){
     //-1 is an error!!!!
