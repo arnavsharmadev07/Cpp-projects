@@ -22,15 +22,19 @@ class Piece{
         virtual string retName() = 0;
         void translateMoveTOCords();
         virtual bool validateMotion(Piece *board[8][8],int i_c = 0,int j_c = 0,int i_m = 0,int j_m = 0){
-            char name1 = board[i_c][j_c]->retPlayerType(),name2 = board[i_m][j_m]->retPlayerType();
+            char type1 = this->playerType;
+            if(board[i_m][j_m]!=nullptr){
+                char type2 = board[i_m][j_m]->retPlayerType();
+                if(type1==type2) return false;
+            }
             int rowStep = (i_c<i_m)? 1:-1;
             int colStep = (j_c<j_m)? 1:-1;
             while((i_c != i_m) || (j_c != j_m)){
-                if(board[i_c][j_c] != nullptr && (name1==name2)){
-                    return false;
-                }
                 i_c+=rowStep;
                 j_c+=colStep;
+                if(board[i_c][j_c] != nullptr && (i_c!=i_m && j_c !=j_m)){
+                    return false;
+                }
             }
             return true;
         };
@@ -49,6 +53,7 @@ class Rook : virtual public Piece{
                 if(validateMotion(board,i,j,X_Y[0],X_Y[1])){
                     return true;
                 }
+                return false;
             }
             else{return 0;}
         }
@@ -56,14 +61,23 @@ class Rook : virtual public Piece{
 };
 class Knight : public Piece{
     string pieceName="Knight";
-    bool validateMotion(Piece* board[8][8],int i_c,int j_c,int i_m,int j_m) override {}
+    bool validateMotion(Piece* board[8][8],int i_c,int j_c,int i_m,int j_m) override {return true;}
     public:
         Knight(char c) : Piece(c){}
         bool validateMove(Piece* board[8][8],int i,int j,string move) override{
             vector<int> X_Y = chessCordsTOarrayCords(move);
             int colDifference = myModulus(X_Y[1]-j),rowDifference = myModulus(X_Y[0]-i);
-            if(colDifference== 2 && rowDifference==1) return true;
-            else if(colDifference==1 && rowDifference==2) return true;
+            char type1 = this->playerType;
+            if((colDifference == 2 && rowDifference ==1) || (colDifference == 1 && rowDifference ==2)){
+                if(board[X_Y[0]][X_Y[1]]!= nullptr){
+                    char type2 = board[X_Y[0]][X_Y[1]]->retPlayerType();
+                    if(type1!=type2) return true;
+                    else{ return false;}
+                }
+                else{
+                    return true;
+                }
+            }
             else{return false;}
         }
         string retName(){return pieceName;}
@@ -80,6 +94,7 @@ class Bishop : virtual public Piece{
                 if(validateMotion(board,i,j,X_Y[0],X_Y[1])){
                     return true;
                 }
+                return false;
             }
             else{return false;}
         }
@@ -117,22 +132,28 @@ class King : public Piece{
 };
 class Pawn : public Piece{
     string pieceName="Pawn";
-    bool validateMotion(Piece* board[8][8],int i_c,int j_c,int i_m,int j_M){
-    }
+    bool validateMotion(Piece* board[8][8],int i_c,int j_c,int i_m,int j_M) override{return true;}
     public:
         Pawn(char c) : Piece(c){}
         bool validateMove(Piece* board[8][8],int i,int j,string move) override{
             vector<int> X_Y = chessCordsTOarrayCords(move);
             int colDifference = X_Y[1]-j,rowDifference = X_Y[0]-i;
-            if((myModulus(colDifference)==1 || myModulus(colDifference) ==0) && myModulus(rowDifference)==1){
-                if((playerType == 'B' && rowDifference>0) || (playerType == 'W' && rowDifference<0)){
+            if((this->playerType == 'B' && rowDifference>0) || (this->playerType == 'W' && rowDifference<0)){
+                if(myModulus(rowDifference) == 1 && colDifference == 0){
+                    if(board[X_Y[0]][X_Y[1]] == nullptr){
+                        return true;
+                    }
+                }
+                if(myModulus(rowDifference)== 1 && myModulus(colDifference) == 1 && board[X_Y[0]][X_Y[1]]!=nullptr){
+                    if(this->playerType != board[X_Y[0]][X_Y[1]]->retPlayerType()){
+                        return true;
+                    }
+                }
+                if(i==1 || i == 6 && myModulus(rowDifference) == 2 && myModulus(colDifference) == 0){
                     return true;
                 }
-                else{
-                    return false;
-                }
             }
-            else{return false;}
+            return false;
         }
         string retName() override{return pieceName;}
 };
@@ -306,7 +327,7 @@ vector<int> chessCordsTOarrayCords(string position){
         }
     }
     for(int i = 1;i<=8;i++){
-        if(position[1]==i){
+        if((position[1]-'0')==i){
             noterror2 = 1;
         }
     }
