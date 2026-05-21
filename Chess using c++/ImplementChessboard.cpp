@@ -118,7 +118,7 @@ void ChessBoard :: kill_MovePiece(){
     board[currentPosition[0]][currentPosition[1]] = nullptr;
 }
 int ChessBoard :: gameLoop(char playerType,string chance){
-    //-2 means exit -1 means invalid input and 1 means correct validation + move and 2 means fails coz of check 
+    //-2 means exit -1 means invalid input and 1 means correct validation + move and 2 means fails coz of check,10 means friend attacked! 
     int Code;
     bool moveVerified;
     Code = askCurrentPosition();
@@ -129,19 +129,29 @@ int ChessBoard :: gameLoop(char playerType,string chance){
             cout<<chance<<"'s move!try again -->";
             cin>>ask_inp;
             currentPosition = chessCordsTOarrayCords(ask_inp);
-            if(currentPosition[0]<0) return -1;
+            if(currentPosition[0]<0){return -1;}
         }
         Code = askFuturePosition(playerType);
         if(Code>=0){
-            if(currentPosition[0]==move_to_position[0] && currentPosition[1]==move_to_position[1]) return -1;
+            if(Code==10){
+                cout<<"Error!friend attacked,try again --> ";
+                Code = askFuturePosition(playerType);
+                if(Code==10 || Code<0) return -3;
+            }
             moveVerified = board[currentPosition[0]][currentPosition[1]]->validateMove(board,currentPosition[0],currentPosition[1],move_to_position[0],move_to_position[1]);
             if(moveVerified){
                 kill_MovePiece();
                 Code = 1; //fine execution
             }
+            else{
+                return -1;
+            }
         }
     }
-        return Code;
+    if(Code == -1) return errorLog();
+    currentPosition.clear();
+    move_to_position.clear();
+    return Code;
 }
 int ChessBoard :: askCurrentPosition(){
     string position_current;
@@ -150,14 +160,28 @@ int ChessBoard :: askCurrentPosition(){
     currentPosition = chessCordsTOarrayCords(position_current);
     return verifyInput(currentPosition,position_current);
 }
+int ChessBoard :: errorLog(){
+    char post;
+    cout<<"Invalid move,press R to enter again -->";
+    cin>>post;
+    return -3;
+}
 int ChessBoard :: askFuturePosition(char playerType){
     string pieece = board[currentPosition[0]][currentPosition[1]]->retName() + '[' + playerType + ']',position_future;
     cout<<"Enter you move for "<<pieece<<" --> ";
     cin>>position_future;
     move_to_position = chessCordsTOarrayCords(position_future);
-    int m = verifyInput(move_to_position,position_future);
-    cout<<m;
-    return m;
+    int Code = verifyInput(move_to_position,position_future);
+    if(Code>=0){
+        if(currentPosition[0]==move_to_position[0] && currentPosition[1]==move_to_position[1]) return -1;
+        if(board[move_to_position[0]][move_to_position[1]]!=nullptr){
+            if(board[move_to_position[0]][move_to_position[1]]->retPlayerType() == board[currentPosition[0]][currentPosition[1]]->retPlayerType()){
+                move_to_position.clear();
+                return 10;
+            }
+        }
+    }
+    return Code;
 }
 void ChessBoard :: runGame(){
     int repeat,chance_count = 0;
@@ -171,12 +195,12 @@ void ChessBoard :: runGame(){
         this->printBoard();
         chance = (chance_count%2==0)? player1:player2;
         playerType = (chance==player1)? 'W':'B';
-        cout<<chance<<" is now Playing!(press E to exit game)...\n";
+        cout<<chance<<" is now Playing! (press E to exit game or press R to enter again)...\n";
         repeat = gameLoop(playerType,chance);
+        if(repeat == -1){repeat = errorLog();}
+        if(repeat>=0) chance_count++;
         system("cls");
-        chance_count++;
     }while(repeat !=-2 && (repeat==1 || repeat==-1 || repeat==-3));
-    cout<<repeat;
 }
 void ChessBoard :: fetchPastGame(){
     int exit;

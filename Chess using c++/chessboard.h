@@ -23,6 +23,7 @@ class ChessBoard{
     void fetchPastGame();
     int askCurrentPosition();
     int askFuturePosition(char);
+    int errorLog();
     public:
         ChessBoard();
         void game();

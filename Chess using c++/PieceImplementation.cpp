@@ -21,15 +21,8 @@ char Piece :: retPlayerType(){
     return playerType;
 }
 bool Piece :: validateMotion(Piece *board[8][8],int i_c,int j_c,int i_m,int j_m){
-    char type1 = this->playerType;
     int rowStep = (i_c==i_m)? 0:(i_c<i_m)? 1:-1;
     int colStep = (j_c==j_m)? 0:(j_c<j_m)? 1:-1;
-    if(board[i_m][j_m]!=nullptr){
-        char type2 = board[i_m][j_m]->retPlayerType();
-        if(type1==type2){
-            return false;
-        }
-    }
     while((i_c != i_m) || (j_c != j_m)){
         i_c+=rowStep;
         j_c+=colStep;
@@ -39,14 +32,6 @@ bool Piece :: validateMotion(Piece *board[8][8],int i_c,int j_c,int i_m,int j_m)
     }
     return true;
 };
-bool Piece :: checkFriend(Piece* board[8][8],int i_m,int j_m){
-    if(board[i_m][j_m]!=nullptr){
-        if((this->playerType ==  board[i_m][j_m]->retPlayerType())){
-            return false;
-        }
-    }
-    return true;
-}
 Piece :: ~Piece(){}
 
 /*       Rook class       */
@@ -55,8 +40,7 @@ Rook :: Rook(){}
 Rook :: Rook(char c) : Piece(c){}
 bool Rook :: validateMove(Piece* board[8][8],int i,int j,int i_m,int j_m){
     int rowDifference = myModulus(i_m-i),colDifference = myModulus(j_m-j); 
-    if(checkFriend(board,i,j)){}
-    else if((rowDifference==0 && colDifference>0) || (rowDifference >0 && colDifference==0)){
+    if((rowDifference==0 && colDifference>0) || (rowDifference >0 && colDifference==0)){
         if(validateMotion(board,i,j,i_m,j_m)){
             return true;
         }
@@ -71,16 +55,8 @@ Knight :: Knight(char c) : Piece(c){}
 bool Knight :: validateMotion(Piece* board[8][8],int i_c,int j_c,int i_m,int j_m){return true;}
 bool Knight :: validateMove(Piece* board[8][8],int i,int j,int i_m,int j_m){
     int colDifference = myModulus(j_m-j),rowDifference = myModulus(i_m-i);
-    char type1 = this->playerType;
     if((colDifference == 2 && rowDifference ==1) || (colDifference == 1 && rowDifference ==2)){
-        if(board[i_m][j_m]!= nullptr){
-            char type2 = board[i_m][j_m]->retPlayerType();
-            if(type1!=type2) return true;
-            else{ return false;}
-        }
-        else{
-            return true;
-        }
+        return true;
     }
     else{return false;}
 }
@@ -113,20 +89,11 @@ bool Queen :: validateMove(Piece* board[8][8],int i,int j,int i_m,int j_m){
 /*       King class       */
 
 King :: King(char c) : Piece(c){}
-bool King :: validateMotion(Piece* board[8][8],int i_c,int j_c,int i_m,int j_m){
-    int rowGap = (i_c<i_m)?1:-1;
-    int colGap = (j_c<j_m)?1:-1;
-    if(this->playerType == board[i_m][j_m]->retPlayerType()){
-        return false;
-    }
-    while(i_c==i_m && j_c==j_m){
-        //this needs to be done
-    }
-}
+bool King :: validateMotion(Piece* board[8][8],int i_c,int j_c,int i_m,int j_m){return true;}
 bool King :: validateMove(Piece* board[8][8],int i,int j,int i_m,int j_m){
     int colDifference = myModulus(j_m-j),rowDifference = myModulus(i_m-i);
     if(colDifference == 1 || rowDifference == 1){
-        
+        return true;
     }
 }
 

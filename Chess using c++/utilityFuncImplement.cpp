@@ -9,6 +9,7 @@ vector<int> chessCordsTOarrayCords(string position){
     bool noterror1  = 0,noterror2 = 0;
     if(position.length()!=2){
         if(position == "E"){ temp.push_back(-2);}
+        else if(position == "R"){temp.push_back(-3);}
         else{
             temp.push_back(-1);
         }
@@ -18,12 +19,10 @@ vector<int> chessCordsTOarrayCords(string position){
         for(char a = 'a'; a<='h';a++){
             if(tolower(position[0])==a){
                 noterror1 = 1;
-                cout<<1;
             }
         }
         if(i>=1 && i<=8){
             noterror2 = 1;
-            cout<<2;
         }
         if(!noterror1 || !noterror2){
             temp.push_back(-1);
