@@ -13,8 +13,7 @@ class ChessBoard{
     bool play = true;
     char boardX[8] = {'A','B','C','D','E','F','G','H'};
     char cellCorner = '+',cellY = '|';
-    int chance_count = 0;
-    string cellX = "-----------",player1,player2;
+    string cellX = "-----------",player1,player2,winner = "",fileName = "gameRecords.txt";
     void setPieces();
     int verifyInput(vector<int> & vec,string & position);
     void kill_MovePiece();
@@ -24,6 +23,8 @@ class ChessBoard{
     int askCurrentPosition();
     int askFuturePosition(char);
     int errorLog();
+    void saveProgress();
+    void clearLogs();
     public:
         ChessBoard();
         void game();

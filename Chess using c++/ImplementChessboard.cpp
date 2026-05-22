@@ -3,6 +3,7 @@
 #include <string>
 #include <iomanip>
 #include <windows.h>
+#include <fstream>
 #include "Chessboard.h"
 #include "utilityfuncs.h"
 
@@ -32,11 +33,19 @@ void ChessBoard :: setPieces(){
 }
 
 ChessBoard :: ChessBoard(){setPieces();}
-
+void ChessBoard :: clearLogs(){
+    ofstream fout;
+        fout.open(fileName);
+        fout<<"";
+        fout.close();
+        fout.open("totalGames.txt");
+        fout<<0;
+        fout.close();
+}
 void ChessBoard ::game(){
     int choice;
     cout<<endl<<endl
-        <<"--- Welcome to the CONSOLE CHESS ---\n\t"<<"1. Enter (1) to Play Chess.\n\t2. Enter (2) to Fetch Past games. \n\t3. Enter (3) to Quit\n\nChoice-->";
+        <<"--- Welcome to the CONSOLE CHESS ---\n\t"<<"1. Enter (1) to Play Chess.\n\t2. Enter (2) to Fetch Past games. \n\t3. Enter (3) to delete game records. \n\t4. Enter (4) to exit.\n\nChoice-->";
     cin>>choice;
     switch(choice){
         case 1:
@@ -48,8 +57,11 @@ void ChessBoard ::game(){
             game();
             break;
         case 3:
+            clearLogs();
+            cout<<"Game history cleared!";
+            break;
+        case 4:
             cout<<"Exiting..";
-            return;
             break;
         default:
             do{
@@ -183,6 +195,38 @@ int ChessBoard :: askFuturePosition(char playerType){
     }
     return Code;
 }
+void ChessBoard :: saveProgress(){
+    //we are just saving the game here no need to fetch the game in this function.
+    int gameNumber = 0;
+    char num;
+    ofstream fout;
+    ifstream fin;
+    fin.open("totalGames.txt");
+    while(!fin.eof()){
+        fin>>num;
+        gameNumber += 10*(num-'0');
+    }
+    fin.close();
+    gameNumber++;
+    fout.open("totalGames.txt");
+    fout<<gameNumber;
+    fout.close();
+    fout.open(fileName);
+    fout<<gameNumber<<"\n"<<"{";//fout the winner on the next line if it is none
+    fout<<winner<<endl;
+    for(int i = 0;i<8;i++){
+        for(int j = 0;j<8;j++){
+            if(board[i][j]!=nullptr){
+                fout<<"("<<board[i][j]->retPlayerType()<<"),("<<board[i][j]->retName()<<"),("<<i<<j<<")"<<endl;
+            }
+            else{
+                continue;
+            }
+        }
+    }
+    fout<<"}\n";
+    fout.close();
+}
 void ChessBoard :: runGame(){
     int repeat,chance_count = 0;
     string chance;
@@ -201,6 +245,17 @@ void ChessBoard :: runGame(){
         if(repeat>=0) chance_count++;
         system("cls");
     }while(repeat !=-2 && (repeat==1 || repeat==-1 || repeat==-3));
+    if(repeat == -2 || winner!=""){
+        string ask;
+        cout<<"Do you want to save the game?(yes/no)";
+        do{
+            cin>>ask;
+            if(ask == "yes"){
+                saveProgress();
+            }
+            if(ask != "no" && ask != "yes") cout<<"Invalid input ,enter again -->";
+        } while(ask!="yes");
+    }
 }
 void ChessBoard :: fetchPastGame(){
     int exit;
